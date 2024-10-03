@@ -3,16 +3,13 @@
 Use the automation_context module to wrap your function in an Automate context helper.
 """
 
-from pydantic import Field, SecretStr
 from speckle_automate import (
     AutomationContext,
     execute_automate_function,
 )
 
-from flatten import flatten_base
-
 from src import function
-
+from src.utils.result_file import write_list_of_lists_to_file
 
 def automate_function_without_inputs(
     automate_context: AutomationContext
@@ -28,15 +25,9 @@ def automate_function_without_inputs(
     """
     # The context provides a convenient way to receive the triggering version.
     version_root_object = automate_context.receive_version()
-
-    function.bjorn_magic(version_root_object)
-
-    automate_context.mark_run_success("No forbidden types found.")
-
-    # If the function generates file results, this is how it can be
-    # attached to the Speckle project/model
-    # automate_context.store_file_result("./report.pdf")
-
+    data = function.bjorn_magic(version_root_object)
+    file_path = write_list_of_lists_to_file(data)
+    automate_context.store_file_result(file_path)
 
 # make sure to call the function with the executor
 if __name__ == "__main__":
